@@ -78,6 +78,7 @@ if __name__ == "__main__":
     playlist.total_duration()
     playlist.remove_song("Song 1")
     playlist.total_duration()
+    len(playlist)
     print("")
     playlist.remove_song("мьлмля")
     playlist.add_song("Song 3", "2 min")
