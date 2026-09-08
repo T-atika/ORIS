@@ -45,36 +45,39 @@ class Playlist:
     def total_duration(self):
         try:
             duration_pl = sum(song["duration"] for song in self._song)
+            print(f"Длительность: {duration_pl}")
             return duration_pl
         except (KeyError, TypeError):
             print("Ошибка: некоректна длительность треков")
             return 0
 
     def __len__(self):
-        return len(self._song)
+        cnt = len(self._song)
+        print(f"Кол-во песен в плейлисте: {cnt}")
+        return cnt
 
     def display(self):
         if not self._song:
             print("Плейлист пуст")
         else:
-            print(f"Кол-во треков: {len(self)}, Длительность плейлиста: {self.total_duration()}")
             for index, song in enumerate(self._song):
                 print(f"{index + 1}. {song['name']} {song['duration']} секунд")
 
 
 if __name__ == "__main__":
     playlist = Playlist()
-    print(playlist.total_duration())
-    print(len(playlist))
+    playlist.total_duration()
+    len(playlist)
     playlist.display()
+    print("")
     playlist.add_song("Song 1", 200)
     playlist.add_song("Song 2", 300)
     playlist.add_song("Song 3", 400)
     playlist.add_song("Song 4", 500.33)
-    print(len(playlist))
-    print(playlist.total_duration())
+    len(playlist)
+    playlist.total_duration()
     playlist.remove_song("Song 1")
-    print(playlist.total_duration())
+    playlist.total_duration()
     print("")
     playlist.remove_song("мьлмля")
     playlist.add_song("Song 3", "2 min")
