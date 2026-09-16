@@ -1,0 +1,39 @@
+Terminal 1
+(.venv) PS C:\Users\minad\PycharmProjects\3sem>  cd ОРИС
+(.venv) PS C:\Users\minad\PycharmProjects\3sem\ОРИС> cd .\chat\
+(.venv) PS C:\Users\minad\PycharmProjects\3sem\ОРИС\chat> python server.py
+Server listening
+[+] u1 connected from ('127.0.0.1', 59949)
+[+] u2 connected from ('127.0.0.1', 59951)
+[!] ('127.0.0.1', 59949) connection reset
+[-] u1 disconnected
+[+] u3 connected from ('127.0.0.1', 64295)
+[!] ('127.0.0.1', 64295) connection reset
+[-] u3 disconnected
+
+Terminal  2
+(.venv) PS C:\Users\minad\PycharmProjects\3sem>  cd ОРИС
+(.venv) PS C:\Users\minad\PycharmProjects\3sem\ОРИС> cd .\chat\
+(.venv) PS C:\Users\minad\PycharmProjects\3sem\ОРИС\chat> python client.py u1
+TEXT Hi!
+
+[u2] TEXT Hello!
+LIST
+
+u1
+u2
+QUIT
+(.venv) PS C:\Users\minad\PycharmProjects\3sem\ОРИС\chat> python client.py u3
+QUIT
+
+Terminal 3
+(.venv) PS C:\Users\minad\PycharmProjects\3sem>  cd ОРИС
+(.venv) PS C:\Users\minad\PycharmProjects\3sem\ОРИС> cd .\chat\
+(.venv) PS C:\Users\minad\PycharmProjects\3sem\ОРИС\chat> python client.py u2
+
+[u1] TEXT Hi!
+TEXT Hello!
+
+[SERVER]: u1 left the chat
+
+[SERVER]: u3 left the chat
