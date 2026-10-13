@@ -58,7 +58,6 @@ class MainWindow(QMainWindow):
         self.result_display.setReadOnly(True)
         self.result_display.setPlaceholderText("Здесь появится информация о созданной задаче...")
 
-
         self.vbox.addWidget(self.label_task)
         self.vbox.addWidget(self.line_edit_task)
         self.vbox.addWidget(self.label_description)
@@ -77,7 +76,6 @@ class MainWindow(QMainWindow):
         self.button_remove.clicked.connect(self.delete_task)
         self.button_clear.clicked.connect(self.clear_form)
 
-
     def create_task(self):
         line = self.line_edit_task.text().strip()
 
@@ -94,12 +92,10 @@ class MainWindow(QMainWindow):
         elif self.high.isChecked():
             priority = "High"
 
-
         if self.check_box_1.isChecked():
             important_cb = "Yes"
         else:
             important_cb = "No"
-
 
         if self.check_box_2.isChecked():
             send_cb = "Yes"
@@ -121,9 +117,7 @@ class MainWindow(QMainWindow):
         self.status_task.setText("Status: Task created")
         self.counter_label.setText(f"Created tasks: {self.tasks_cnt}")
 
-
     def delete_task(self):
-
         if not self.tasks:
             self.result_display.setText("Задач пока нет...")
             return
@@ -131,11 +125,9 @@ class MainWindow(QMainWindow):
         self.tasks.pop()
         self.tasks_cnt -= 1
 
-
         self.update_tasks()
         self.counter_label.setText(f"Created tasks: {self.tasks_cnt}")
         self.status_task.setText("Status: Task deleted")
-
 
     def update_tasks(self):
         if not self.tasks:
@@ -164,7 +156,6 @@ class MainWindow(QMainWindow):
 
         self.result_display.setPlainText("\n".join(lines))
 
-
     def clear_form(self):
         self.line_edit_task.clear()
         self.line_edit_description.clear()
@@ -174,7 +165,6 @@ class MainWindow(QMainWindow):
         self.check_box_2.setChecked(False)
 
         self.status_task.setText("Status: Task cleared")
-
 
 
 if __name__ == "__main__":
