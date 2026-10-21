@@ -1,12 +1,17 @@
+import os
 import sys
+import json
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QLineEdit, QTextEdit, QRadioButton, \
     QHBoxLayout, QCheckBox, QPushButton, QComboBox, QListWidget, QListWidgetItem, QMessageBox, QDialog
 from PyQt6.QtCore import pyqtSignal, Qt
 
+TASKS_FILE = os.path.join(os.path.dirname(__file__), 'tasks.json')
+
 
 class MainWindow(QMainWindow):
     task_created = pyqtSignal(dict)
+
     def __init__(self):
         super().__init__()
         self.tasks = []
@@ -63,7 +68,6 @@ class MainWindow(QMainWindow):
         self.button_layout.addWidget(self.button_about)
         self.button_layout.addWidget(self.button_del_select)
 
-
         self.filter_task = QComboBox()
         self.filter_task.addItems(["All", "Low", "Medium", "High"])
 
@@ -85,6 +89,7 @@ class MainWindow(QMainWindow):
         self.vbox.addWidget(self.counter_label)
 
         self.filter_task.currentTextChanged.connect(self.update_tasks)
+        self.task_list.itemDoubleClicked.connect(self.edit_task)
         self.button_create.clicked.connect(self.create_task)
         self.button_remove.clicked.connect(self.delete_task)
         self.button_clear.clicked.connect(self.clear_form)
@@ -94,6 +99,10 @@ class MainWindow(QMainWindow):
         self.button_about.clicked.connect(self.show_about)
         self.button_del_select.clicked.connect(self.delete_task_sel)
         self.task_list.itemSelectionChanged.connect(self.on_selection_changed)
+
+        self.load_tasks()
+        self.update_tasks()
+        self.counter_label.setText(f"Created tasks: {len(self.tasks)}")
 
         self.setStyleSheet("""
         QMainWindow{background-color: #FFB6C1}
@@ -112,7 +121,7 @@ class MainWindow(QMainWindow):
         line = self.line_edit_task.text().strip()
 
         if not line:
-            QMessageBox.warning(self, "Ошибка валидации", "Название задачи не должно быть пустым" )
+            QMessageBox.warning(self, "Ошибка валидации", "Название задачи не должно быть пустым")
             return
 
         text = self.line_edit_description.toPlainText()
@@ -152,7 +161,7 @@ class MainWindow(QMainWindow):
         self.counter_label.setText(f"Created tasks: {len(self.tasks)}")
         self.status_task.setText(f"Задача создана")
         self.clear_form()
-
+        self.save_tasks()
 
     def delete_task(self):
         if not self.tasks:
@@ -162,6 +171,7 @@ class MainWindow(QMainWindow):
         self.tasks.pop()
 
         self.update_tasks()
+        self.save_tasks()
         self.counter_label.setText(f"Created tasks: {len(self.tasks)}")
         self.status_task.setText("Status: Task deleted")
 
@@ -182,6 +192,7 @@ class MainWindow(QMainWindow):
             self.update_tasks()
             self.counter_label.setText(f"Created tasks: {len(self.tasks)}")
             self.status_task.setText("Status: Task deleted")
+            self.save_tasks()
 
     def update_tasks(self):
         self.task_list.clear()
@@ -204,9 +215,35 @@ class MainWindow(QMainWindow):
 
         for i, task in enumerate(filter_tasks, start=1):
             decs = task["description"] if "description" in task else ""
-            item = QListWidgetItem(f'№{i}. {task["task"]} - {task["priority"]}\nОписание: {decs} \nВажная: {task["important"]}\nУведомление: {task["send"]}')
+            item = QListWidgetItem(
+                f'№{i}. {task["task"]} - {task["priority"]}\nОписание: {decs} \nВажная: {task["important"]}\nУведомление: {task["send"]}')
             item.setData(Qt.ItemDataRole.UserRole, task['id'])
             self.task_list.addItem(item)
+
+    def save_tasks(self):
+        try:
+            with open(TASKS_FILE, 'w', encoding='utf-8') as f:
+                json.dump(self.tasks, f, ensure_ascii=False, indent=4)
+        except Exception as e:
+            print(f"Оштбка сохранения:{e}")
+
+    def load_tasks(self):
+        if os.path.exists(TASKS_FILE):
+            try:
+                with open(TASKS_FILE, 'r', encoding='utf-8') as f:
+                    self.tasks = json.load(f)
+
+                    if self.tasks:
+                        self.next_task_id = max(task["id"] for task in self.tasks) + 1
+                    else:
+                        self.next_task_id = 1
+            except Exception as e:
+                print("Ошибка загрузки {e}")
+                self.tasks = []
+                self.next_task_id = 1
+        else:
+            self.tasks = []
+            self.next_task_id = 1
 
     def clear_form(self):
         self.line_edit_task.clear()
@@ -218,13 +255,13 @@ class MainWindow(QMainWindow):
 
         self.status_task.setText("Status: Task cleared")
 
-
     def clear_list(self):
         if not self.tasks:
             QMessageBox.warning(self, "Внимание", "Список задач и так пуст")
             return
 
-        reply = QMessageBox.question(self, "Подтверждение", "Хотите удалить все задачи?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        reply = QMessageBox.question(self, "Подтверждение", "Хотите удалить все задачи?",
+                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
 
         if reply == QMessageBox.StandardButton.Yes:
             self.tasks.clear()
@@ -233,6 +270,7 @@ class MainWindow(QMainWindow):
             self.update_tasks()
             self.counter_label.setText(f"Created tasks: {len(self.tasks)}")
             self.status_task.setText("Status: Task cleared")
+            self.save_tasks()
 
         else:
             self.status_task.setText("Отмена отчистки")
@@ -243,6 +281,32 @@ class MainWindow(QMainWindow):
     def show_about(self):
         dialog = Dialog()
         dialog.exec()
+
+    def edit_task(self, item):
+        task_id = item.data(Qt.ItemDataRole.UserRole)
+
+        task_to_edit = None
+        for task in self.tasks:
+            if task["id"] == task_id:
+                task_to_edit = task
+                break
+        dialog = EditionTask(task_to_edit)
+
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            update_task = dialog.get_task()
+            if update_task is None:
+                QMessageBox.warning(self, "Ошибка", "Пустое название!")
+                return
+
+            for i, task in enumerate(self.tasks):
+                if task["id"] == task_id:
+                    self.tasks[i] = update_task
+                    break
+
+            self.save_tasks()
+            self.update_tasks()
+            self.status_task.setText("Status: Task edited")
+
 
 class Dialog(QDialog):
     def __init__(self):
@@ -269,6 +333,78 @@ class Dialog(QDialog):
         QDialog{background-color: #FFB6C1}
         QPushButton{background-color: #FFFAFA; color: #C71585}
         """)
+
+
+class EditionTask(QDialog):
+    def __init__(self, task_data):
+        super().__init__()
+        self.setWindowTitle("Редактор задач")
+        self.resize(500, 400)
+
+        self.origin_task = task_data
+
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        layout.addWidget(QLabel("Название:"))
+        self.title_edit = QLineEdit(task_data["task"])
+        layout.addWidget(self.title_edit)
+
+        layout.addWidget(QLabel("Описание"))
+        self.description_edit = QTextEdit(task_data["description"])
+        layout.addWidget(self.description_edit)
+
+        layout.addWidget(QLabel("Приоритет"))
+        self.priority_edit = QComboBox()
+        self.priority_edit.addItems(["Low", "Medium", "High"])
+        index = self.priority_edit.findText(task_data["priority"])
+        if index >= 0:
+            self.priority_edit.setCurrentIndex(index)
+        layout.addWidget(self.priority_edit)
+
+        check_layout = QHBoxLayout()
+        self.important_check = QCheckBox("Important")
+        self.important_check.setChecked(task_data["important"] == "Yes")
+        check_layout.addWidget(self.important_check)
+
+        self.send_check = QCheckBox("Send")
+        self.send_check.setChecked(task_data["send"] == "Yes")
+        check_layout.addWidget(self.send_check)
+
+        layout.addLayout(check_layout)
+
+        button_layout = QHBoxLayout()
+        self.save_btn = QPushButton("Save")
+        self.cancel_btn = QPushButton("Cancel")
+        button_layout.addWidget(self.save_btn)
+        button_layout.addWidget(self.cancel_btn)
+        layout.addLayout(button_layout)
+
+        self.save_btn.clicked.connect(self.accept)
+        self.cancel_btn.clicked.connect(self.reject)
+
+        self.setStyleSheet("""
+        QDialog{background-color: #FFB6C1}
+        QPushButton{background-color: #FFFAFA; color: #C71585}
+        QPushButton:hover {background-color: #D8BFD8}
+        QPushButton:disabled {background-color: #f0eaee; color: #cec0c5}
+        QlineEdit{background-color: #FFF0F5}
+        QTextEdit{background-color: #FFF0F5}
+        """)
+
+    def get_task(self):
+        title = self.title_edit.text().strip()
+        if not title:
+            return None
+        return {
+            "id": self.origin_task["id"],
+            "task": title,
+            "description": self.description_edit.toPlainText(),
+            "priority": self.priority_edit.currentText(),
+            "important": "Yes" if self.important_check.isChecked() else "No",
+            "send": "Yes" if self.send_check.isChecked() else "No"
+        }
+
 
 if __name__ == "__main__":
     app1 = QApplication(sys.argv)
