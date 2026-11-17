@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ playlist.title }}
+{% endblock %}
+
+{% block content %}
+    <h2>{{ playlist.title }}</h2>
+
+    <div class="card detail-info">
+        <p><strong>Жанр:</strong> {{ playlist.genre }}</p>
+        <p><strong>Количество треков:</strong> {{ playlist.track_count }}</p>
+        <p><strong>Описание:</strong> {{ playlist.description }}</p>
+        <p><strong>Дата создания:</strong> {{ playlist.created_at }}</p>
+    </div>
+
+    <div class="actions">
+        <a href="{{ url_for('edit_playlist', playlist_id=playlist['id']) }}" class="btn btn-edit">Редактировать</a>
+
+        <form method="POST" action="{{ url_for('delete_playlist', playlist_id=playlist['id']) }}" style="display: inline;">
+            <button type="submit" class="btn" onclick="return confirm('Ты точно хочешь удалить этот плейлист?')">Удалить</button>
+        </form>
+    </div>
+
+    <div class="actions" style="margin-top: 24px;">
+        <a href="{{ url_for('index') }}" class="btn btn-link">Вернуться к списку</a>
+    </div>
+{% endblock %}

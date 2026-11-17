@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Добавить плейлист{% endblock %}
+
+{% block content %}
+
+    {% if errors %}
+        <div>
+            <h3>Исправьте ошибки:</h3>
+            <ul>
+                {% for error in errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <h2>Создать новый плейлист</h2>
+
+    <form method="POST" action="{{ url_for('add_playlist') }}">
+        <p>
+            <label>Название:</label><br>
+            <input type="text" name="title" value="{{ title|default('', true) }}">
+        </p>
+        <p>
+            <label>Жанр:</label><br>
+            <input type="text" name="genre" value="{{ genre|default('', true) }}">
+        </p>
+        <p>
+            <label>Количество треков:</label><br>
+            <input type="number" name="track_count" value="{{ track_count|default('', true) }}">
+        </p>
+        <p>
+            <label>Описание:</label><br>
+            <textarea name="description" rows="4" cols="50">{{ description|default('', true) }}</textarea>
+        </p>
+        <p>
+            <button type="submit">Сохранить плейлист</button>
+        </p>
+    </form>
+
+{% endblock %}

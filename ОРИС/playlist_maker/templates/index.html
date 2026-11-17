@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Список плейлистов{% endblock %}
+
+{% block content %}
+    <h2>Мои плейлисты</h2>
+
+    {% if playlists %}
+        <ul>
+            {% for playlist in playlists %}
+                <li>
+                    <strong>{{ playlist.title }}</strong>
+                    ({{ playlist.genre }}) — {{ playlist.track_count }} треков.
+                    <br>
+                    <a href="{{ url_for('detail', playlist_id=playlist['id']) }}" class="btn">Открыть подробно</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Пока нет ни одного плейлиста.</p>
+    {% endif %}
+{% endblock %}
