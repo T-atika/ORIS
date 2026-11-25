@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+    <h2>Регистрация</h2>
+
+    {% if errors %}
+        <div class="errors">
+            <h3>Исправьте ошибки:</h3>
+            <ul>
+                {% for error in errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('register') }}">
+        <p>
+            <label>Логин:</label><br>
+            <input type="text" name="username" value="{{ username|default('', true) }}">
+        </p>
+        <p>
+            <label>Пароль:</label><br>
+            <input type="password" name="password">
+        </p>
+        <p>
+            <label>Повторите пароль:</label><br>
+            <input type="password" name="password_confirm">
+        </p>
+        <p>
+            <button type="submit">Зарегистрироваться</button>
+        </p>
+    </form>
+
+    <p style="margin-top: 16px;">
+        Уже есть аккаунт? <a href="{{ url_for('login') }}" class="btn">Войти</a>
+    </p>
+{% endblock %}

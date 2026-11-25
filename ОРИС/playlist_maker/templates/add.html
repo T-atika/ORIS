@@ -3,9 +3,10 @@
 {% block title %}Добавить плейлист{% endblock %}
 
 {% block content %}
+    <h2>Создать новый плейлист</h2>
 
     {% if errors %}
-        <div>
+        <div class="errors">
             <h3>Исправьте ошибки:</h3>
             <ul>
                 {% for error in errors %}
@@ -14,8 +15,6 @@
             </ul>
         </div>
     {% endif %}
-
-    <h2>Создать новый плейлист</h2>
 
     <form method="POST" action="{{ url_for('add_playlist') }}">
         <p>
@@ -27,8 +26,8 @@
             <input type="text" name="genre" value="{{ genre|default('', true) }}">
         </p>
         <p>
-            <label>Количество треков:</label><br>
-            <input type="number" name="track_count" value="{{ track_count|default('', true) }}">
+            <label>Дата создания:</label><br>
+            <input type="date" name="created_at" value="{{ created_at|default('', true) }}">
         </p>
         <p>
             <label>Описание:</label><br>
@@ -38,5 +37,4 @@
             <button type="submit">Сохранить плейлист</button>
         </p>
     </form>
-
 {% endblock %}
